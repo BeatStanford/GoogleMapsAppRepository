@@ -1,8 +1,10 @@
 package com.example.jaeyoung.googlemapsapp;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
-
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -13,8 +15,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
-    private double latitude;
-    private double longitude;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,9 +47,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.newLatLng(seoul));
 
 
-        //drops a marker at current location
+        /*drops a marker at current location
         LatLng f101 = new LatLng(32.958310, -117.190596);
         mMap.addMarker(new MarkerOptions().position(f101).title("Current Location: F101, CCA"));
+        */
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
+            return;
+        }
+        mMap.setMyLocationEnabled(true);
     }
 }
