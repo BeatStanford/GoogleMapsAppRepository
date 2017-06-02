@@ -43,6 +43,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Location myLocation;
     private static final float MY_LOC_ZOOM_FACTOR = 17.0f;
     private boolean isTracked = false;
+    private boolean usingGPS = false; //boolean used to determine which color marker to use.
 
 
     @Override
@@ -196,7 +197,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Toast.makeText(MapsActivity.this, "Location has changed", Toast.LENGTH_SHORT).show();
                 dropAmarker(LocationManager.GPS_PROVIDER); //Drops gps markers
                 locationManager.removeUpdates(locationListenerNetwork); //disables network updates when ur using GPS
-
+                usingGPS = true; //sets boolean usingGPS to true, used for reference to change the color of the marker
             }
 
             @Override
@@ -247,7 +248,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //drop a marker on the map (create a method called drop a marker)
                 dropAmarker(LocationManager.NETWORK_PROVIDER);
 
-                //relaunch request for network location updates
+                //changes dot color:
+                usingGPS = false;
 
             }
 
@@ -277,6 +279,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (myLocation == null) {
             //display a message in Log.d and/or Toast
+            Log.d("myMaps", "location is null");
         } else {
             userLocation = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
 
@@ -286,16 +289,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //Add a shape for your marker that is not the default one.
 
             //if provider is gps it is a different color then if it is network provider
-            Circle circle = mMap.addCircle(new CircleOptions()
-                    .center(userLocation).
-                            radius(1).
-                            strokeColor(Color.RED).
-                            strokeWidth(2).
-                            fillColor(Color.RED));
+            Circle marker;
+            if (usingGPS == true) {
+                marker = mMap.addCircle(new CircleOptions().center(userLocation).radius(1).strokeColor(Color.BLACK).strokeWidth(2).fillColor(Color.BLACK));
+                Log.d("MyMaps", "black marker placed, using GPS to track location");
+            } else if (usingGPS == false) {
+                marker = mMap.addCircle(new CircleOptions().center(userLocation).radius(1).strokeColor(Color.WHITE).strokeWidth(2).fillColor(Color.WHITE));
+                Log.d("MyMaps", "white marker placed, using network to track location");
+            }
             mMap.animateCamera(update);
         }
 
 
+
+    }
+    public void clearMarkers(View v) {
+        mMap.clear();
     }
 }
 
