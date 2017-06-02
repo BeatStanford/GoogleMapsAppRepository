@@ -10,10 +10,32 @@
 
         <Button
             android:id="@+id/button2"
-            android:layout_width="147dp"
-            android:layout_height="95dp"
+            android:layout_width="77dp"
+            android:layout_height="wrap_content"
             android:onClick="changeMapView"
             android:text="View" />
+        <Button
+            android:id="@+id/searchButton"
+            android:layout_width="86dp"
+            android:layout_height="wrap_content"
+            android:onClick="searchPlaces"
+            android:text="Search" />
+
+        <EditText
+            android:id="@+id/searchField"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ems="10"
+            android:inputType="textPersonName" />
+        <Button
+            android:id="@+id/trackMe"
+            android:layout_width="82dp"
+            android:layout_height="wrap_content"
+            android:onClick="trackMe"
+            android:text="Track Me" />
+
+
 
     </LinearLayout>
 
