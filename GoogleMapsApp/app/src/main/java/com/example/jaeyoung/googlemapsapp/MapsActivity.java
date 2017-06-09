@@ -45,7 +45,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private static final float MY_LOC_ZOOM_FACTOR = 17.0f;
     private boolean isTracked = false;
     private boolean usingGPS = false; //boolean used to determine which color marker to use.
-
+    private boolean Trackable = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -162,13 +162,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
     public void trackMe(View view) {
-        isTracked = true;
-        if (isTracked == true) {
+
+        if (Trackable == true) {
+            Toast.makeText(MapsActivity.this, "Currently getting your location", Toast.LENGTH_SHORT).show();
             getLocation();
-            isTracked = false;
-        }
-        if (isTracked == false) {
-            return;
+        } else if (Trackable == false) {
+            locationManager.removeUpdates(locationListenerNetwork);
+            locationManager.removeUpdates(locationListenerGPS);
+            Toast.makeText(MapsActivity.this, "Stopped Tracking", Toast.LENGTH_SHORT).show();
+            Trackable = true;
         }
     }
 
@@ -180,56 +182,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         List<Address> addressList = new ArrayList<>();
         List<Address> distanceList = new ArrayList<>();
 
-        //checks to see if nothing is entered in the search so the app doesn't crash
         if (location.equals("")) {
             Toast.makeText(MapsActivity.this, "No Search Entered", Toast.LENGTH_SHORT).show();
             return;
+        } else if (myLocation == null) {
+            //handles the null location case
+            Toast.makeText(MapsActivity.this, "location unknown - press 'Track Me' then try searching again", Toast.LENGTH_SHORT).show();
+            return;
         } else if (location != null || !location.equals("")) {
+            mMap.clear();
             Log.d("MyMaps", "search feature started");
             Geocoder geocoder = new Geocoder(this);
             try {
-                addressList = geocoder.getFromLocationName(location, 99);
-                Log.d("Mymaps", "made a max 99 entry search result");
+                addressList = geocoder.getFromLocationName(location, 1000,(myLocation.getLatitude()-(1.0/12)), (myLocation.getLongitude()-(1.0/12)),(myLocation.getLatitude()+(1.0/12)),(myLocation.getLongitude()+(1.0/12)));
+                Log.d("MyMaps", "made a max 1000 entry search result");
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-            //calculates radius for every location and adds the ones that are 5 or under
             for (int i = 0; i < addressList.size(); i++) {
-                Log.d("mymaps", "currently calculating distances");
-                Address currentAddress = addressList.get(i);
-
-                double earthRadius = 3958.75; // miles (or 6371.0 kilometers)
-                double dLat = Math.toRadians(currentAddress.getLatitude()-myLocation.getLatitude());
-                double dLng = Math.toRadians(currentAddress.getLongitude()-myLocation.getLongitude());
-                double sindLat = Math.sin(dLat / 2);
-                double sindLng = Math.sin(dLng / 2);
-                double a = Math.pow(sindLat, 2) + Math.pow(sindLng, 2)
-                        * Math.cos(Math.toRadians(myLocation.getLatitude())) * Math.cos(Math.toRadians(currentAddress.getLatitude()));
-                double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                double dist = earthRadius * c;
-
-                //adds 5 mile radius
-                Log.d("mymaps","checking to see if radius is less than 5");
-                if (dist <= 5) {
-                    distanceList.add(addressList.get(i));
-                    Log.d("MyMaps", "radius is less than 5 and added it to distanceList");
-                } else {
-                    Log.d("mymaps","distance is not less than 5");
-                }
-            }
-
-            if (distanceList.size() == 0) {
-                Log.d("MyMaps", "no search results found");
-                Toast.makeText(MapsActivity.this, "No search results within 5 miles", Toast.LENGTH_SHORT).show();
-            }
-
-            //adds marker to every location 5 miles or less away
-            for (int i = 0; i < distanceList.size(); i++) {
-
-                Address address = distanceList.get(i);
+                Address address = addressList.get(i);
                 LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                Log.d("Mymaps", "currently adding markers");
                 mMap.addMarker(new MarkerOptions().position(latLng).title("Search Results"));
                 mMap.animateCamera(CameraUpdateFactory.newLatLng(latLng));
             }
