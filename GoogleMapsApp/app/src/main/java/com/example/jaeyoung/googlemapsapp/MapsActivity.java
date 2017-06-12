@@ -39,7 +39,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private boolean isGPSenabled = false;
     private boolean isNetworkEnabled = false;
     private boolean canGetLocation = false;
-    private static final long MIN_TIME_BW_UPDATES = 1000 * 15; //15 seconds
+    private static final long MIN_TIME_BW_UPDATES = 1000 * 4; //5 seconds
     private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 5.0f; //5 meters
     private Location myLocation;
     private static final float MY_LOC_ZOOM_FACTOR = 17.0f;
@@ -101,6 +101,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void getLocation() {
+        Trackable = false;
         try {
             locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
@@ -194,7 +195,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.d("MyMaps", "search feature started");
             Geocoder geocoder = new Geocoder(this);
             try {
-                addressList = geocoder.getFromLocationName(location, 1000,(myLocation.getLatitude()-(1.0/12)), (myLocation.getLongitude()-(1.0/12)),(myLocation.getLatitude()+(1.0/12)),(myLocation.getLongitude()+(1.0/12)));
+                addressList = geocoder.getFromLocationName(location, 1000,(myLocation.getLatitude()-(5.0/60)), (myLocation.getLongitude()-(5.0/60)),(myLocation.getLatitude()+(5.0/60)),(myLocation.getLongitude()+(5.0/60)));
                 Log.d("MyMaps", "made a max 1000 entry search result");
             } catch (IOException e) {
                 e.printStackTrace();
@@ -210,7 +211,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LocationListener locationListenerGPS = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                Log.d("MyMaps", "Location has changed");
+                Log.d("MyMaps", "GPS Location has changed");
                 Toast.makeText(MapsActivity.this, "Location has changed", Toast.LENGTH_SHORT).show();
                 dropAmarker(LocationManager.GPS_PROVIDER); //Drops gps markers
                 locationManager.removeUpdates(locationListenerNetwork); //disables network updates when ur using GPS
@@ -264,7 +265,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 //drop a marker on the map (create a method called drop a marker)
                 dropAmarker(LocationManager.NETWORK_PROVIDER);
-
+                Log.d("MyMaps", "called dropmarker() method from network");
+                Toast.makeText(MapsActivity.this, "called DropMarker method from network", Toast.LENGTH_SHORT).show();
                 //changes dot color:
                 usingGPS = false;
 
@@ -312,7 +314,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.d("MyMaps", "black marker placed, using GPS to track location");
             } else if (usingGPS == false) {
                 marker = mMap.addCircle(new CircleOptions().center(userLocation).radius(1).strokeColor(Color.RED).strokeWidth(2).fillColor(Color.RED));
-                Log.d("MyMaps", "white marker placed, using network to track location");
+                Log.d("MyMaps", "red marker placed, using network to track location");
             }
             mMap.animateCamera(update);
         }
